@@ -13,9 +13,9 @@ class Config:
         ['true', 'on', '1']
     MAIL_USERNAME = options["MAIL_USERNAME"]
     MAIL_PASSWORD = options["MAIL_PASSWORD"]
-    FLASKY_MAIL_SUBJECT_PREFIX = '[BRcredit]'
-    FLASKY_MAIL_SENDER = 'BRcredit Admin <BRcredit@gmail.com>'
-    FLASKY_ADMIN = options["BRCREDIT_ADMIN"]
+    BRCREDIT_MAIL_SUBJECT_PREFIX = '[BRcredit]'
+    BRCREDIT_MAIL_SENDER = 'BRcredit Admin <BRcredit@gmail.com>'
+    BRCREDIT_ADMIN = options["BRCREDIT_ADMIN"]
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     @staticmethod
