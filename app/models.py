@@ -8,6 +8,26 @@ from flask import current_app, request
 from flask_login import UserMixin, AnonymousUserMixin
 from . import db, login_manager
 
+class Connect(UserMixin, db.Model):
+    __tablename__ = 'connection'
+    id = db.Column(db.Integer, primary_key=True)
+    borrower_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    guarantor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    status = db.Column(db.String(64), default='pending')
+    amount = db.Column(db.Numeric())
+    message = db.Column(db.String(256))
+    last_update = db.Column(db.DateTime(), default=datetime.utcnow)
+
+    def __init__(self, **kwargs):
+        super(Connect, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return '<Connect %r>' % self.amount
+
+    def connect_guarantor(self, email):
+        pass
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -22,9 +42,20 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     cpf = db.Column(db.Integer)
-    dob = db.Column(db.DateTime())
+    dob = db.Column(db.Date())
     #photo = db.Column(db.String(32))
     #posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    connection_borrowers = db.relationship(
+        'Connect',
+        foreign_keys=[Connect.borrower_id],
+        backref='borrower',
+        lazy='dynamic')
+    connection_guarantors = db.relationship(
+        'Connect',
+        foreign_keys=[Connect.guarantor_id],
+        backref='guarantor',
+        lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

@@ -7,7 +7,10 @@
 <div class="page-header">
     <h1>Welcome, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
 </div>
-
+<div class="connection-tabs">
+    {% include '_borrowers_connections.html' %}
+    {% include '_guarantors_connections.html' %}
+</div>
 {% if pagination %}
 <div class="pagination">
     {{ macros.pagination_widget(pagination, '.index') }}

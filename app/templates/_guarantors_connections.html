@@ -1,0 +1,22 @@
+<ul class="borrower-connections">
+    {% for connection in guarantor_connections %}
+    <li class="borrower-connection">
+        <div class="borrower-connection-content card">
+            <div class="submit-date card-header">{{ moment(connection.last_update).fromNow() }}</div>
+            <div class="card-body">
+            <ul>
+                <li>Borrower: {{ connection.borrower.email }}</li>
+                <li>Loan amount requested: {{ connection.amount }}</li>
+                <li>Message {{ connection.message }}</li>
+            </ul>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group">
+                  <a href="{{ url_for('.accept-borrower', id=connection.id) }}" class="btn btn-primary">Accept</a>
+                  <a href="{{ url_for('.reject-borrower', id=connection.id )}}" class="btn btn-default">Reject</a>
+                </div>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

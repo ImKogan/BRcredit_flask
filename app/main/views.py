@@ -2,15 +2,21 @@ from flask import render_template, redirect, url_for, abort, flash, request,\
     current_app, make_response
 from flask_login import login_required, current_user
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm
+from .forms import EditProfileForm, EditProfileAdminForm, ConnectForm
 from .. import db
-from ..models import Permission, Role, User
+from ..models import Permission, Role, User, Connect
 from ..decorators import admin_required, permission_required
+from .errors import forbidden
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    print("index")
+    if current_user.is_authenticated:
+        user = current_user._get_current_object()
+        borrower_connections = Connect.query.filter_by(
+            guarantor_id=user.id, status='pending').\
+        order_by(Connect.last_update.desc()).all()
+        return render_template('index.html', borrower_connections=borrower_connections)
     return render_template('index.html')
 
 
@@ -66,26 +72,45 @@ def edit_profile_admin(id):
     form.about_me.data = user.about_me
     return render_template('edit_profile.html', form=form, user=user)
 
-
-@main.route('/post/<int:id>')
-def post(id):
-    post = Post.query.get_or_404(id)
-    return render_template('post.html', posts=[post])
-
-
-@main.route('/edit/<int:id>', methods=['GET', 'POST'])
+@main.route('/connect-guarantor', methods=['GET', 'POST'])
 @login_required
-def edit(id):
-    post = Post.query.get_or_404(id)
-    if current_user != post.author and \
-            not current_user.can(Permission.ADMIN):
-        abort(403)
-    form = PostForm()
+def connect_guarantor():
+    user = current_user._get_current_object()
+    form = ConnectForm(user)
     if form.validate_on_submit():
-        post.body = form.body.data
-        db.session.add(post)
+        guarantor = User.query.filter_by(email=form.guarantor_email.data).first()
+        print(guarantor)
+        connection = Connect(
+            borrower_id=user.id,
+            guarantor_id=guarantor.id,
+            amount=form.amount.data,
+            message=form.message.data)
+        db.session.add(connection)
         db.session.commit()
-        flash('The post has been updated.')
-        return redirect(url_for('.post', id=post.id))
-    form.body.data = post.body
-    return render_template('edit_post.html', form=form)
+        flash('Your connection request has been sent.')
+        return redirect(url_for('.index'))
+    return render_template('connect_guarantor.html', form=form)
+
+@main.route('/accept-borrower/<id>', methods=['POST'])
+@login_required
+def accept_borrower(id):
+    connection = Connect.query.get(id)
+    if current_user._get_current_object() != connection.guarantor:
+        return forbidden("Unauthorized User")
+    connection.status = "accepted"
+    db.session.add(connection)
+    db.session.commit()
+    flash('Your action has been processed.')
+    return redirect(url_for('.index'))
+
+@main.route('/reject-borrower/<id>', methods=['POST'])
+@login_required
+def reject_borrower(id):
+    connection = Connect.query.get(id)
+    if current_user._get_current_object() != connection.guarantor:
+        return forbidden("Unauthorized User")
+    connection.status = "rejected"
+    db.session.add(connection)
+    db.session.commit()
+    flash('Your action has been processed.')
+    return redirect(url_for('.index'))

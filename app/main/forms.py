@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField,\
-    SubmitField
+    SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, Regexp
 from wtforms import ValidationError
 from flask_pagedown.fields import PageDownField
-from ..models import Role, User
+from ..models import Role, User, Connect
 
 
 class NameForm(FlaskForm):
@@ -49,3 +49,23 @@ class EditProfileAdminForm(FlaskForm):
         if field.data != self.user.username and \
                 User.query.filter_by(username=field.data).first():
             raise ValidationError('Username already in use.')
+
+class ConnectForm(FlaskForm):
+    """docstring for ClassName"""
+    guarantor_email = StringField('Guarantor Email', 
+        validators=[DataRequired(), Length(1, 64), Email()])
+    amount = IntegerField('Loan amount requested to guarantee')
+    message = TextAreaField('Message to guarantor')
+    submit = SubmitField('Submit')
+
+    def __init__(self, user, *args, **kwargs):
+        super(ConnectForm, self).__init__(*args, **kwargs)
+        self.user = user
+    
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('Email address does not have an account.')
+        elif field.data == self.user.email:
+            raise ValidationError('Can not use self as guarantor')
+
+        
