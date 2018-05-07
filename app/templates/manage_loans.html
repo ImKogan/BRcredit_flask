@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+
+{% if borrower_loans|length == 0 and guarantor_loans|length == 0 %}
+    <div class="section-header">
+        <h3>You have no loans associated with your account.</h3>
+    </div>
+{% endif %}
+<div class="pending-tabs">
+    {% include '_borrower_loans.html' %}
+    {% include '_guarantor_loans.html' %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h3>Review Application information</h3>
+</div>
+<div class="row">
+	<div class="col-md-4">
+	    {{ wtf.quick_form(personal_form) }}
+	</div>
+	<div class="col-md-4">
+	    {{ wtf.quick_form(finances_form) }}
+	</div>
+	<div class="col-md-4">
+	    {{ wtf.quick_form(address_form) }}
+	</div>
+
+</div>
+<div class="row">
+	<div class="col-md-4">
+	    {{ wtf.quick_form(terms_form) }}
+	</div>
+</div>
+<div class="row">
+	<div class="text-center">
+	    <form id="Hidden-form-application" method="post" style="display: none">
+	        <input type="hidden" name="application_id" value="{{ application_id }}">
+	        <input type="hidden" name="applicant" value="{{ applicant }}">
+		</form>
+		<div class="btn-group" align="center">
+		    <a href="" onclick="$('#Hidden-form-application').submit(); return false;" title="My link title" class="btn btn-primary">Submit Application</a>
+		    <a href="url_for('.index')" class="btn btn">Edit Application</a>
+		</div>
+	</div>
+</div>
+{% endblock %}

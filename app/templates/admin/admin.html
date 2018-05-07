@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+Admin
+<div class="pending-tabs">
+    {% include 'admin/_pending_applications.html' %}
+</div>
+{% endblock %}
+

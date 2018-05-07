@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField,\
-    SubmitField, IntegerField
+    SubmitField, IntegerField, DecimalField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, Email, Regexp
 from wtforms import ValidationError
 from flask_pagedown.fields import PageDownField
@@ -68,4 +69,36 @@ class ConnectForm(FlaskForm):
         elif field.data == self.user.email:
             raise ValidationError('Can not use self as guarantor')
 
-        
+class PersonalInfoForm(FlaskForm):
+    firstname = StringField('First Name:', validators=[DataRequired()])
+    lastname = StringField('Last Name', validators=[DataRequired()])
+    cpf = IntegerField('CPF:')
+    dob = DateField('Date of Birth:')
+    submit = SubmitField('Next')
+
+class AddressForm(FlaskForm):
+    street = StringField('Street:', validators=[DataRequired()])
+    house = IntegerField('House:', validators=[DataRequired()])
+    apartment = StringField('Apartment:')
+    city = StringField('City:', validators=[DataRequired()])
+    state = StringField('State:', validators=[DataRequired()])
+    country = StringField('Country:', validators=[DataRequired()])
+    zipcode = IntegerField('Zipcode:', validators=[DataRequired()])
+    submit = SubmitField('Next')
+
+class FinancesForm(FlaskForm):
+    salary = IntegerField('Salary:', validators=[DataRequired()])
+    occupation = StringField('Occupation:', validators=[DataRequired()])
+    employer = StringField('Employer:', validators=[DataRequired()])
+    time_employed = IntegerField('Years Employed:', validators=[DataRequired()])
+    employment_status = SelectField('Employment Status:',
+    choices=[(1, 'Employed'), (0, 'Unemployed'), (2, 'Self Employed')],
+        validators=[DataRequired()], coerce=int)
+    submit = SubmitField('Next')
+
+class ReviewApplication(FlaskForm):
+    amount = IntegerField('Amount:')
+    rate = DecimalField('Rate %')
+    installments = IntegerField('Installments:')
+    payment = DecimalField('Payment:')
+

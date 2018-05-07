@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+
+<div class="col-lg-6">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4><p><b>Loan id #</b>{{ loan.id }} <b>Loan Date: </b>{{ moment(loan.loan_date).format("MMM Do YYYY") }} </p>
+        <p><b>Principal:</b>{{ "${:,.2f}".format(loan.principal) }} <b>Outstanding:</b>{{ "${:,.2f}".format(loan.outstanding) }}</p></h4>
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed" style="border-collapse:collapse;">
+
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>Scheduled Date</th>
+                    <th>Payment Date</th>
+                    <th>Payment Amount</th>
+                    <th>Paid</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for payment in loan.payments %}
+                <tr data-toggle="collapse" data-target="#{{ payment.id }}" class="accordion-toggle">
+                    <td>
+                        <button class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
+                    </td>
+                    <td>{{ moment(payment.scheduled_date).format("MMM DD YYYY") }}</td>
+                    <td>
+                        {% if payment.paid %}
+                        {{ moment(payment.payment_date).format("MMM DD YYYY") }}
+                        {% endif %}
+                    </td>
+                    <td>{{ "${:,.2f}".format(payment.payment) }}</td>
+                    <td>
+                        {% if payment.paid %}
+                        <b>Paid</b>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="12" class="hiddenRow">
+                    <div class="accordian-body collapse" id="{{ payment.id }}"> 
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Days Late</th>
+                                    <th>Paid by Guarantor</th>
+                                    <th></th>
+                                    <th>Make a Payment</th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {% if payment.payment_date %}
+                                            {% if payment.payment_date > payment.scheduled_date %}
+                                                {{ payment.payment_date.diff(payment.scheduled_date, 'days') }}
+                                            {% endif %}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if payment.paid_by_guarantor %}
+                                        <b>Yes</b>
+                                        {% endif %}
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        {% if not payment.payment_date %}
+                                        <div class="btn-group">
+                                            <form action="{{ url_for('.make_payment', payment_id=payment.id) }}" method="POST">
+                                                <input type="submit" class="btn btn-primary" value="Pay">
+                                            </form>                
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                      
+                    </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>            
+</div> 
+        
+</div>
+{% endblock %}
+

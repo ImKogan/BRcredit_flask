@@ -1,0 +1,36 @@
+{% if borrower_applications|length > 0 %}
+<div class="section-header">
+    <h3>Submitted borrower application pending your information. Please review and submit your information.</h3>
+</div>
+{% endif %}
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for application in borrower_applications %}
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{{ application.id }}">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ application.id }}" aria-expanded="false" aria-controls="collapse{{ application.id }}">
+                Application id #{{ application.id }} <b>Submitted: </b>{{ moment(application.updated_at).fromNow() }}
+                </a>
+            </h4>
+        </div>
+    <div id="collapse{{ application.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ application.id }} ">
+        <div class="panel-body">
+            <div class="borrower-application-content card">
+                <div class="card-body">
+                    <ul>
+                        <li><b>Borrower:</b> {{ application.borrower.email }}</li>
+                        <li><b>Loan amount requested:</b> {{ "${:,.0f}".format(application.amount) }}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                      <a href="{{ url_for('.continue_application', application_id=application.id, applicant='guarantor') }}" class="btn btn-primary">Continue</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>

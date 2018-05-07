@@ -1,0 +1,37 @@
+{% if borrower_loans|length > 0 %}
+    <div class="section-header">
+        <h3>Your Loans</h3>
+    </div>
+{% endif %}
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for loan in borrower_loans %}
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{{ loan.id }}">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ loan.id }}" aria-expanded="false" aria-controls="collapse{{ loan.id }}">
+                Loan id #{{ loan.id }} <b>Loan Date: </b>{{ moment(loan.loan_date).format("MMM Do YYYY") }}
+                </a>
+            </h4>
+        </div>
+    <div id="collapse{{ loan.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ loan.id }}">
+        <div class="panel-body">
+            <div class="borrower-loan-content card">
+                <div class="card-body">
+                    <ul>
+                        <li><b>Guarantor:</b> {{ loan.guarantor.email }}</li>
+                        <li><b>Principal:</b> {{ "${:,.0f}".format(loan.principal) }}</li>
+                        <li><b>Outstanding:</b> {{ "${:,.0f}".format(loan.outstanding) }}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <a href="{{ url_for('.loan_manager', loan_id=loan.id) }}" class="btn btn-primary">Manage Loan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>

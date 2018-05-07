@@ -27,6 +27,20 @@
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a></li>
                 {% endif %}
+                {% if current_user.is_authenticated and current_user.is_administrator() %}
+                <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+
+                        Admin <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('admin.pending_applications') }}">Pending Applications</a></li>
+                        <li><a href="{{ url_for('admin.manage_terms') }}">Manage Terms</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+                </ul>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
@@ -37,6 +51,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('main.connect_guarantor') }}">Connect Guarantor</a></li>
+                        <li><a href="{{ url_for('main.manage_loans') }}">Manage Loans</a></li>
                     </ul>
                 </li>
 

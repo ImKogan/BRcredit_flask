@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h3>Choose an Address</h3>
+</div>
+<ul class="address-list">
+    {% for address in addresses %}
+    <li class="address-list">
+        <div class="address-list-content card">
+            <div class="card-body">
+            <ul>
+                <li><b>Address Line 1:</b> {{ address.street }} {{ address.house }}</li>
+                <li><b>Address Line 2:</b> {{ address.apartment }} </li>
+                <li><b>City:</b> {{ address.city }}</li>
+                <li><b>State:</b> {{ address.state }}</li>
+                <li><b>ZipCode:</b> {{ address.zipcode }}</li>
+                <li><b>Country:</b> {{ address.country }}</li>
+            </ul>
+            </div>
+            <div class="card-footer">
+                <form id="Hidden-form-address" method="post" style="display: none">
+                        <input type="hidden" name="application_id" value="{{ application_id }}">
+                        <input type="hidden" name="applicant" value="{{ applicant }}">
+                        <input type="hidden" name="address_id" value="{{ address.id }}">
+                </form>
+                <div class="btn-group">
+                    <a href="" onclick="$('#Hidden-form-address').submit(); return false;" title="My link title" class="btn btn-primary">Use this Address</a>
+                    <!-- <a href="{{ url_for('.address_list', application_id=application, applicant=applicant, address_id=address.id) }}" class="btn btn-primary">Use this Address</a> -->
+                </div>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+    <div class="add-address">
+              <a href="{{ url_for('.address_form', application_id=application, applicant=applicant) }}" class="add-address">Use new Address</a>
+    </div>
+{% endblock %}

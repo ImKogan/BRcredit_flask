@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}BRcredit{% endblock %}
+
+{% block page_content %}
+
+{% if terms|length > 0 %}
+<div class="section-header">
+    <h3>Terms.</h3>
+</div>
+{% endif %}
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for term in terms %}
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{{ term.id }}">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ term.id }}" aria-expanded="false" aria-controls="collapse{{ term.id }}">
+                term id #{{ term.id }} <b>Name: </b>{{ term.name }}
+                </a>
+            </h4>
+        </div>
+    <div id="collapse{{ term.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ term.id }}">
+        <div class="panel-body">
+            <div class="pending-term-content card">
+                <div class="card-body">
+                    <ul>
+                        <li><b>Installments:</b> {{ term.installments }}</li>
+                        <li><b>Rate:</b> {{ "%{:,.2f}".format(term.rate) }}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                      <a href="{{ url_for('.edit_term', term_id=term.id) }}" class="btn btn-primary">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+<div class="add-terms">
+          <a href="{{ url_for('.term_form') }}" class="add-terms">Add new terms</a>
+</div>
+
+{% endblock %}

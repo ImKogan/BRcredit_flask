@@ -1,22 +1,37 @@
-<ul class="borrower-connections">
+{% if guarantor_connections|length > 0 %}
+    <div class="section-header">
+        <h3>Accepted guarntor connections. You can start your application.</h3>
+    </div>
+{% endif %}
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
     {% for connection in guarantor_connections %}
-    <li class="borrower-connection">
-        <div class="borrower-connection-content card">
-            <div class="submit-date card-header">{{ moment(connection.last_update).fromNow() }}</div>
-            <div class="card-body">
-            <ul>
-                <li>Borrower: {{ connection.borrower.email }}</li>
-                <li>Loan amount requested: {{ connection.amount }}</li>
-                <li>Message {{ connection.message }}</li>
-            </ul>
-            </div>
-            <div class="card-footer">
-                <div class="btn-group">
-                  <a href="{{ url_for('.accept-borrower', id=connection.id) }}" class="btn btn-primary">Accept</a>
-                  <a href="{{ url_for('.reject-borrower', id=connection.id )}}" class="btn btn-default">Reject</a>
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading{{ connection.id }}">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ connection.id }}" aria-expanded="false" aria-controls="collapse{{ connection.id }}">
+                Application id #{{ connection.id }} <b>Submitted: </b>{{ moment(connection.last_update).fromNow() }}
+                </a>
+            </h4>
+        </div>
+    <div id="collapse{{ connection.id }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ connection.id }}">
+        <div class="panel-body">
+            <div class="guarantor-connection-content card">
+                <div class="card-body">
+                    <ul>
+                        <li><b>Guarantor:</b> {{ connection.guarantor.email }}</li>
+                        <li><b>Loan amount requested:</b> {{ "${:,.0f}".format(connection.amount) }}</li>
+                        <li><b>Message:</b> {{ connection.message }}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <a href="{{ url_for('.start_application', connection_id=connection.id, applicant='borrower') }}" class="btn btn-primary">Start Application</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </li>
-    {% endfor %}
-</ul>
+    </div>
+</div>
+{% endfor %}
+</div>
