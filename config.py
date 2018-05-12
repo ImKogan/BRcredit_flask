@@ -14,9 +14,10 @@ class Config:
     MAIL_USERNAME = options["MAIL_USERNAME"]
     MAIL_PASSWORD = options["MAIL_PASSWORD"]
     BRCREDIT_MAIL_SUBJECT_PREFIX = '[BRcredit]'
-    BRCREDIT_MAIL_SENDER = 'BRcredit Admin <BRcredit@gmail.com>'
+    BRCREDIT_MAIL_SENDER = 'BRcredit Admin '+'<'+options["BRCREDIT_ADMIN"]+'>'
     BRCREDIT_ADMIN = options["BRCREDIT_ADMIN"]
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    HOST = options["HOST"]
 
     @staticmethod
     def init_app(app):
