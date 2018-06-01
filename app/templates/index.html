@@ -5,8 +5,14 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Welcome, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
+    <h2>{% if current_user.is_authenticated %}{{ current_user.username }}, welcome{% else %}Welcome{% endif %} to BRcredit!</h2>
 </div>
+
+{% if not current_user.is_authenticated %}
+<div id="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<script type="text/javascript" src="static/main.js"></script>
+{% endif %}
+
 <div class="connection-tabs">
     {% include '_borrowers_connections.html' %}
     {% include '_guarantors_connections.html' %}
