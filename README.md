@@ -1,10 +1,10 @@
 # BRcredit_flask
 
-# Website
+## Website
 
 https://www.brcreditapp.com/
 
-## Technology used
+### Technology used
 
 Flask(Python) web application using Bootstrap front end library. Main application works without any native JavaScript, style.js file ony used to render homepage graph. SQLite databse. 
 
