@@ -5,30 +5,104 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h2>{% if current_user.is_authenticated %}{{ current_user.username }}, welcome{% else %}Welcome{% endif %} to BRcredit!</h2>
+	<h2>{% if current_user.is_authenticated %}{{ current_user.username }}, welcome{% else %}Welcome{% endif %} to BRcredit!</h2>
 </div>
 
 {% if not current_user.is_authenticated %}
+
+<h3>About BRcredit</h3>
 <div id="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 <script type="text/javascript" src="static/main.js"></script>
-{% endif %}
 
-<div class="connection-tabs">
-    {% include '_borrowers_connections.html' %}
-    {% include '_guarantors_connections.html' %}
-    {% include '_borrowers_applications.html' %}
-</div>
-<div class="application-tabs">
+<div class="application-information">
+	<p>BRcredit was conceived as a solution to the exorbitant APR credit card rates in Brazil. In our analysis, the abnormally high rates facing the Brazilian consumer stem from two factors.</p>
+	<div class="borderless">
+		<ul class="list-group">
+			<li class="list-group-item" style="border: none">The near monopoly of the top five (Itau, Banco do Brasil, Bradesco, Santander, Caixa) institutions in the credit market</li>
+			<li class="list-group-item" style="border: none">The lack of complete and reliable information that would allow lenders to distinguish between high and medium risk applicants</li>
+		</ul>
+	</div>
 
-</div>
-{% if pagination %}
-<div class="pagination">
-    {{ macros.pagination_widget(pagination, '.index') }}
-</div>
-{% endif %}
-{% endblock %}
+	<p>While the first factor can be theoretically addressed by new entrants into the market, the second factor requires a more comprehensive solution. 
 
-{% block scripts %}
-{{ super() }}
-{{ pagedown.include_pagedown() }}
-{% endblock %}
+		Our analysis views the consumer credit market in 3 tiers:
+		<div class="borderless">
+			<ul class="list-group">
+				<li class="list-group-item" style="border: none">Top tier of consumers (< 10%) who enjoy relatively low APR rates of approximately 100%</li>
+				<li class="list-group-item" style="border: none">A middle tier (~30%) that is subject to the average rates that have been as high as 400%</li>
+				<li class="list-group-item" style="border: none">Finally, a lower tier that generally has limited or no access to established credit sources</li>
+			</ul>
+		</div>
+		<p>While the brazilian market has seen some new entrants (Goldman Sachs report covered <a href="https://www.nytimes.com/2017/05/15/business/dealbook/goldman-sachs-sees-big-potential-for-fintech-in-brazil.html">here</a> in the NYT), the market is large and fragmented enough to acommodate many more entrants.</p>
+
+		<h5><b>Enter BRcredit</b></h5>
+		<p>BRcredit is a multi-staged approach that takes advantage of the market opportunity (relative monopoly and high rates) while tackling the barrier of low quality information.</p>
+		<p>
+			Stage 1 - Offer lower rates to medium or high risk applicants - for whom data is unreliable or incomplete - provided a guarantor with low risk credentials. Although some higher risk individuals would be unable to provide such a guarantor, many would. During this stage BRcredit will be able to study the credit habits of many consumers who are either discouraged from the current market by prohibitive rates, don’t carry a balance, or default on their loans. 
+		</p>
+	</div>
+
+	<div class="applicatio-how-to">
+		<div class="container">
+			<div class="panel-group">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" href="#collapse1"><b>BRcredit:</b> The appplication - how it works</a>
+						</h4>
+					</div>
+					<div id="collapse1" class="panel-collapse collapse">
+						<div class="panel-body">
+							This application is a prototype. To get a sense of how to use it:
+							<div class="borderless">
+								<ul class="list-group">
+									<li class="list-group-item" style="border: none">
+										Create two accounts. One will be the "guarantor" account, the second, the 'borrpwer" account. An account will require a valid email address
+									</li>
+									<li class="list-group-item" style="border: none">
+										In the "borrower" account follow instructions in the 'Connect Guarantor' link
+									</li>
+									<li class="list-group-item" style="border: none">
+										In the "guarantor" account accept the request to connect
+									</li>
+									<li class="list-group-item" style="border: none">
+										The "borrower" can fill and submit a loan application
+									</li>
+									<li class="list-group-item" style="border: none">
+										The "guarantor" can submit his information for the loan application.
+									</li>
+									<li class="list-group-item" style="border: none">
+										As this is a prototype - a loan application is set to be automatically 'approved'. Both borrower and guarantor can folllow the link 'Manage Loans' to view and make payments.
+									</li>
+								</ul>
+							</div>
+							<p>Some aspects of the process may appear peculiar - such as interest rates denominated in monthly terms - fixed installment plans and so on. These are based on the specifics of the Brazilian market. The latter especially so - as the option to 'parcelar' - to pay in installments is practically ubiquitous throughout the consumer economy. Any purchase - from vacations to flights, mattresses to houswares can be paid in installments. These are financed by the vendor or a third party. This feature of Brazilian consumer culture is in our opinion a strong positive predictor for the viability of our model.</p>
+						</div>
+						<div class="panel-footer"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	{% endif %}
+
+	<div class="connection-tabs">
+		{% include '_borrowers_connections.html' %}
+		{% include '_guarantors_connections.html' %}
+		{% include '_borrowers_applications.html' %}
+	</div>
+	<div class="application-tabs">
+
+	</div>
+	{% if pagination %}
+	<div class="pagination">
+		{{ macros.pagination_widget(pagination, '.index') }}
+	</div>
+	{% endif %}
+	{% endblock %}
+
+	{% block scripts %}
+	{{ super() }}
+	{{ pagedown.include_pagedown() }}
+	{% endblock %}
