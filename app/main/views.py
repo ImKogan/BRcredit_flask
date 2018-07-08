@@ -1,20 +1,24 @@
+'''
+views.py
+
+views module for main part of application
+'''
+
 from datetime import datetime
-from flask import render_template, redirect, url_for, abort, flash, request,\
-    current_app, make_response
+import numpy as np
+from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, ConnectForm,\
     PersonalInfoForm, AddressForm, FinancesForm, ReviewApplication
 from .. import db
 from ..models import User, Connect, Address, Terms, Application, Finances, Loan, Role, Payment
-#from ..decorators import 
+#from ..decorators import
 from .errors import forbidden
-
-import numpy as np
-
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    ''' render index.html'''
     if current_user.is_authenticated:
         user = current_user._get_current_object()
         # redo using relationship
@@ -27,15 +31,16 @@ def index():
         borrower_applications = Application.query.filter_by(
             guarantor_id=user.id, status=1).\
             order_by(Application.updated_at.desc()).all()
-        return render_template('index.html', 
-            borrower_connections=borrower_connections,
-            guarantor_connections=guarantor_connections,
-            borrower_applications=borrower_applications)
+        return render_template('index.html',
+                               borrower_connections=borrower_connections,
+                               guarantor_connections=guarantor_connections,
+                               borrower_applications=borrower_applications)
     return render_template('index.html')
 
 
 @main.route('/user/<username>')
-def user(username):
+def user_page(username):
+    ''' render user.html'''
     user = User.query.filter_by(username=username).first_or_404()
 
     return render_template('user.html', user=user)
@@ -44,6 +49,7 @@ def user(username):
 @main.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    ''' render edit_profile.html for user'''
     form = EditProfileForm()
     if form.validate_on_submit():
         current_user.username = form.username.data
@@ -56,12 +62,12 @@ def edit_profile():
     form.location.data = current_user.location
     return render_template('edit_profile.html', form=form)
 
-
-@main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
+@main.route('/edit-profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 #@admin_required
-def edit_profile_admin(id):
-    user = User.query.get_or_404(id)
+def edit_profile_admin(user_id):
+    ''' render edit_profile.html for admin'''
+    user = User.query.get_or_404(user_id)
     form = EditProfileAdminForm(user=user)
     if form.validate_on_submit():
         user.email = form.email.data
@@ -87,6 +93,7 @@ def edit_profile_admin(id):
 @main.route('/connect-guarantor', methods=['GET', 'POST'])
 @login_required
 def connect_guarantor():
+    ''' render connect_guarantor.html'''
     user = current_user._get_current_object()
     form = ConnectForm(user)
     if form.validate_on_submit():
@@ -102,10 +109,11 @@ def connect_guarantor():
         return redirect(url_for('.index'))
     return render_template('connect_guarantor.html', form=form)
 
-@main.route('/accept-borrower/<id>', methods=['POST'])
+@main.route('/accept-borrower/<connection_id>', methods=['POST'])
 @login_required
-def accept_borrower(id):
-    connection = Connect.query.get(id)
+def accept_borrower(connection_id):
+    ''' accept borrower connection request '''
+    connection = Connect.query.get(connection_id)
     if current_user._get_current_object() != connection.guarantor:
         return forbidden("Unauthorized User")
     connection.status = "accepted"
@@ -114,10 +122,11 @@ def accept_borrower(id):
     flash('Your action has been processed.')
     return redirect(url_for('.index'))
 
-@main.route('/reject-borrower/<id>', methods=['POST'])
+@main.route('/reject-borrower/<connection_id>', methods=['POST'])
 @login_required
-def reject_borrower(id):
-    connection = Connect.query.get(id)
+def reject_borrower(connection_id):
+    ''' reject borrower connection request '''
+    connection = Connect.query.get(connection_id)
     if current_user._get_current_object() != connection.guarantor:
         return forbidden("Unauthorized User")
     connection.status = "rejected"
@@ -129,8 +138,9 @@ def reject_borrower(id):
 @main.route('/continue-application/<application_id>/<applicant>', methods=['GET', 'POST'])
 @login_required
 def continue_application(application_id, applicant):
+    ''' continue application '''
     application = Application.query.get(application_id)
-    if applicant not in ('borrower','guarantor'):
+    if applicant not in ('borrower', 'guarantor'):
         return forbidden("Unauthorized User")
     elif applicant == 'borrower' and \
             current_user._get_current_object() != application.borrower:
@@ -138,7 +148,7 @@ def continue_application(application_id, applicant):
     elif applicant == 'guarantor' and \
             current_user._get_current_object() != application.guarantor:
         return forbidden("Unauthorized User")
-    
+
     form = PersonalInfoForm()
     if request.method == 'GET':
         form.firstname.data = current_user.firstname
@@ -156,16 +166,19 @@ def continue_application(application_id, applicant):
             db.session.commit()
             flash('Your information has been updated.')
             return redirect(url_for('.address_list',
-                application_id=application.id, applicant=applicant))
+                                    application_id=application.id,
+                                    applicant=applicant))
         else:
             return redirect(url_for('.continue_application',
-                application_id=application.id, applicant=applicant))
+                                    application_id=application.id,
+                                    applicant=applicant))
 
 @main.route('/start-application/<connection_id>/<applicant>', methods=['GET', 'POST'])
 @login_required
 def start_application(connection_id, applicant):
+    ''' start application'''
     connection = Connect.query.get(connection_id)
-    if applicant not in ('borrower','guarantor'):
+    if applicant not in ('borrower', 'guarantor'):
         return forbidden("Unauthorized User")
     elif applicant == 'borrower' and \
             current_user._get_current_object() != connection.borrower:
@@ -173,7 +186,7 @@ def start_application(connection_id, applicant):
     elif applicant == 'guarantor' and \
             current_user._get_current_object() != connection.guarantor:
         return forbidden("Unauthorized User")
-    
+
     form = PersonalInfoForm()
     if request.method == 'GET':
         form.firstname.data = current_user.firstname
@@ -184,9 +197,9 @@ def start_application(connection_id, applicant):
     else:
         if form.validate_on_submit():
             application = Application(connection=connection,
-                            borrower=connection.borrower,
-                            guarantor=connection.guarantor,
-                            amount=connection.amount)
+                                      borrower=connection.borrower,
+                                      guarantor=connection.guarantor,
+                                      amount=connection.amount)
             db.session.add(application)
             db.session.commit()
             current_user.firstname = form.firstname.data
@@ -197,23 +210,29 @@ def start_application(connection_id, applicant):
             db.session.commit()
             flash('Your information has been updated.')
             return redirect(url_for('.address_list',
-                application_id=application.id, applicant=applicant))
+                                    application_id=application.id,
+                                    applicant=applicant))
         else:
             return redirect(url_for('.start_application',
-                connection_id=connection_id, applicant=applicant))
-    
+                                    connection_id=connection_id,
+                                    applicant=applicant))
+
 # @main.route('/address-list/<application_id>/<applicant>/',
 #     defaults={'address_id': None}, methods=['GET', 'POST'])
 @main.route('/address-list/<application_id>/<applicant>/', methods=['GET', 'POST'])
 @login_required
 def address_list(application_id, applicant):
+    ''' render address_list.html'''
     if request.method == "GET":
         addresses = current_user._get_current_object().addresses
         if len(addresses) > 0:
             return render_template('address_list.html',
-                addresses=addresses, application=application_id, applicant=applicant)
+                                   addresses=addresses,
+                                   application=application_id,
+                                   applicant=applicant)
         return redirect(url_for('.address_form',
-            application_id=application_id, applicant=applicant))
+                                application_id=application_id,
+                                applicant=applicant))
     else:
         address_id = request.form["address_id"]
         address = Address.query.get(address_id)
@@ -227,24 +246,26 @@ def address_list(application_id, applicant):
         db.session.add(application)
         db.session.commit()
         return redirect(url_for('.finances_form',
-            application_id=application_id, applicant=applicant))
+                                application_id=application_id,
+                                applicant=applicant))
 
 @main.route('/address-form/<application_id>/<applicant>', methods=['GET', 'POST'])
 @login_required
 def address_form(application_id, applicant):
+    ''' render address_form.html'''
     form = AddressForm()
     if request.method == "GET":
         return render_template('address_form.html', form=form)
     else:
         if form.validate_on_submit():
             address = Address(
-                street = form.street.data,
-                house = form.house.data,
-                apartment = form.apartment.data,
-                city = form.city.data,
-                state = form.state.data,
-                country = form.country.data,
-                zipcode = form.zipcode.data)
+                street=form.street.data,
+                house=form.house.data,
+                apartment=form.apartment.data,
+                city=form.city.data,
+                state=form.state.data,
+                country=form.country.data,
+                zipcode=form.zipcode.data)
             address.user = current_user._get_current_object()
             db.session.add(address)
             application = Application.query.get(application_id)
@@ -255,14 +276,17 @@ def address_form(application_id, applicant):
             db.session.add(application)
             db.session.commit()
             return redirect(url_for('.finances_form',
-                application_id=application_id, applicant=applicant))
+                                    application_id=application_id,
+                                    applicant=applicant))
         else:
             return redirect(url_for('.address_form',
-                application_id=application_id, applicant=applicant))
+                                    application_id=application_id,
+                                    applicant=applicant))
 
 @main.route('/finances-form/<application_id>/<applicant>', methods=['GET', 'POST'])
 @login_required
 def finances_form(application_id, applicant):
+    ''' render finances.form.html'''
     if request.method == "GET":
         application = Application.query.get(application_id)
         if applicant == "borrower":
@@ -277,11 +301,11 @@ def finances_form(application_id, applicant):
         print(form.employment_status)
         if form.validate_on_submit():
             finances = Finances(
-                salary = form.salary.data,
-                occupation = form.occupation.data,
-                employer = form.employer.data,
-                time_employed = form.time_employed.data,
-                employment_status = form.employment_status.data)
+                salary=form.salary.data,
+                occupation=form.occupation.data,
+                employer=form.employer.data,
+                time_employed=form.time_employed.data,
+                employment_status=form.employment_status.data)
             #finances.user = current_user._get_current_object()
             db.session.add(finances)
             application = Application.query.get(application_id)
@@ -293,32 +317,37 @@ def finances_form(application_id, applicant):
             db.session.commit()
             if applicant == 'borrower':
                 return redirect(url_for('.choose_terms',
-                    application_id=application_id, applicant=applicant))
+                                        application_id=application_id,
+                                        applicant=applicant))
             elif applicant == 'guarantor':
                 return redirect(url_for('.review_application',
-                    application_id=application_id, applicant=applicant))                
+                                        application_id=application_id,
+                                        applicant=applicant))
         else:
             print("invalid")
             return redirect(url_for('.finances_form',
-                application_id=application_id, applicant=applicant))
+                                    application_id=application_id,
+                                    applicant=applicant))
 
 @main.route('/choose-terms/<application_id>/<applicant>/',
-    defaults={'term_id': None}, methods=['GET', 'POST'])
+            defaults={'term_id': None}, methods=['GET', 'POST'])
 @main.route('/choose-terms/<application_id>/<applicant>/<term_id>', methods=['GET', 'POST'])
 @login_required
 def choose_terms(application_id, applicant, term_id):
+    ''' render terms.html'''
     if request.method == "GET":
         terms = Terms.query.all()
         amount = Application.query.get(application_id).amount
         info = []
         for term in terms:
             info.append({"term_id": term.id,
-                "amount": amount,
-                "rate": term.rate, 
-                "installments": term.installments,
-                "payment": -np.pmt(rate=term.rate/100, nper=term.installments,pv=amount)})
+                         "amount": amount,
+                         "rate": term.rate,
+                         "installments": term.installments,
+                         "payment": -np.pmt(rate=term.rate/100, nper=term.installments, pv=amount)})
         return render_template('terms.html', terms=info,
-            application=application_id, applicant=applicant)
+                               application=application_id,
+                               applicant=applicant)
     else:
         terms = Terms.query.get(request.form["terms_id"])
         application = Application.query.get(application_id)
@@ -327,11 +356,13 @@ def choose_terms(application_id, applicant, term_id):
         db.session.commit()
 
         return redirect(url_for('.review_application',
-            application_id=application_id, applicant=applicant))
+                                application_id=application_id,
+                                applicant=applicant))
 
 @main.route('/review-application/<application_id>/<applicant>', methods=['GET', 'POST'])
 @login_required
 def review_application(application_id, applicant):
+    ''' render review-application.html'''
     if request.method == 'GET':
         user = current_user._get_current_object()
         application = Application.query.get(application_id)
@@ -350,19 +381,22 @@ def review_application(application_id, applicant):
         del finances_form.submit
         # terms = {
         #     "amount": amount,
-        #     "rate": term.rate, 
+        #     "rate": term.rate,
         #     "installments": term.installments,
-        #     "payment": -np.pmt(rate=term.rate/100, nper=term.installments,pv=amount)               
+        #     "payment": -np.pmt(rate=term.rate/100, nper=term.installments, pv=amount)
         #}
         terms_form = ReviewApplication()
         terms_form.amount.data = amount
         terms_form.rate.data = term.rate
         terms_form.installments.data = term.installments
-        terms_form.payment.data = -np.pmt(rate=term.rate/100, nper=term.installments,pv=amount)
+        terms_form.payment.data = -np.pmt(rate=term.rate/100, nper=term.installments, pv=amount)
         return render_template('review_application.html',
-            application=application_id, applicant=applicant,
-            personal_form=personal_form, address_form=address_form,
-            finances_form=finances_form, terms_form=terms_form)
+                               application=application_id,
+                               applicant=applicant,
+                               personal_form=personal_form,
+                               address_form=address_form,
+                               finances_form=finances_form,
+                               terms_form=terms_form)
     else:
         application = Application.query.get(application_id)
         application.created_at = datetime.utcnow()
@@ -370,7 +404,7 @@ def review_application(application_id, applicant):
             application.status = 1
         elif applicant == "guarantor":
             application.status = 2
-        
+
         connection = application.connection
         connection.status = 'submitted'
         db.session.add(application)
@@ -381,21 +415,25 @@ def review_application(application_id, applicant):
 @main.route('/manage-loans', methods=['GET', 'POST'])
 @login_required
 def manage_loans():
+    ''' render manage_loans.html'''
     user = current_user._get_current_object()
     borrower_loans = user.borrow_loans
     guarantor_loans = user.guarantee_loans
     return render_template('manage_loans.html',
-        borrower_loans=borrower_loans, guarantor_loans=guarantor_loans)
+                           borrower_loans=borrower_loans,
+                           guarantor_loans=guarantor_loans)
 
 @main.route('/loan-manager/<loan_id>', methods=['GET', 'POST'])
 @login_required
 def loan_manager(loan_id):
+    ''' render loan_manager.html'''
     loan = Loan.query.get(loan_id)
     return render_template('loan_manager.html', loan=loan)
 
 @main.route('/make-payment/<payment_id>', methods=['GET', 'POST'])
 @login_required
 def make_payment(payment_id):
+    ''' make a payment'''
     user = current_user._get_current_object()
     payment = Payment.query.get(payment_id)
     loan = payment.loan
@@ -409,5 +447,5 @@ def make_payment(payment_id):
     db.session.commit()
     flash('Your payment has been processed.')
     return redirect(url_for('.loan_manager',
-        loan_id=loan.id))
-    
+                            loan_id=loan.id))
+

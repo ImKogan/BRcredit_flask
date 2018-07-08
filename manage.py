@@ -1,15 +1,15 @@
 #!/usr/bin/env python
+'''
+manage.py
+
+project manager module
+'''
 
 import os
-
 from config import Config
-
 from app import create_app, db
-
 from app.models import User, Role
-
 from flask_script import Server, Manager, Shell
-
 from flask_migrate import Migrate, MigrateCommand
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')

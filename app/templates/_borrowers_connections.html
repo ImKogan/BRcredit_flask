@@ -26,10 +26,10 @@
                 </div>
                 <div class="card-footer">
                     <div class="btn-group">
-                        <form action="{{ url_for('.accept_borrower', id=connection.id) }}" method="POST">
+                        <form action="{{ url_for('.accept_borrower', connection_id=connection.id) }}" method="POST">
                             <input type="submit" class="btn btn-primary" value="Accept">
                         </form>
-                        <form action="{{ url_for('.reject_borrower', id=connection.id) }}" method="POST">
+                        <form action="{{ url_for('.reject_borrower', connection_id=connection.id) }}" method="POST">
                             <input type="submit" class="btn btn-default" value="Reject">
                         </form>                
                     </div>
